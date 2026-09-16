@@ -29,7 +29,12 @@ export default function PhorousLoader() {
 
     const ACCENT = '#9C7A3C';
     const GAIN   = 1;
-    const EASE   = 0.085;
+    // On touch devices the browser's native momentum scroll provides smoothness.
+    // Adding our own ease on top creates a double-delay that feels sluggish.
+    // Detect touch and use instant-snap (ease=1) so we just mirror native scroll.
+    const isTouch = window.matchMedia('(hover: none)').matches || 'ontouchstart' in window;
+    const EASE   = isTouch ? 1 : 0.085;
+
 
     let cur = 0;
     let mx = -999, my = -999, rx = -999, ry = -999;

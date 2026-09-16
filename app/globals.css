@@ -646,3 +646,129 @@ textarea.input { min-height: 90px; resize: vertical; }
   @keyframes phMarquee{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
   @keyframes phNudge{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(9px);opacity:1}}
 
+/* ============================================================
+   RESPONSIVE OVERRIDES
+   Targets data-x attributes + section IDs so desktop
+   inline styles are untouched.  ≥ 1025 px is 100% unchanged.
+   ============================================================ */
+
+/* ── 1. Custom cursor: pointer-only devices ── */
+@media (hover: none), (pointer: coarse) {
+  [data-x="ring"] { display: none !important; }
+}
+
+/* ── 2. Tablet / large-phone  ≤ 900 px ── */
+@media (max-width: 900px) {
+  /* Collapse nav text links — keep brand + bag pill */
+  [data-x="navlink"] { display: none !important; }
+
+  /* Shrink bag CTA pill */
+  [data-x="navcta"] {
+    padding: 9px 15px !important;
+    font-size: 10px !important;
+    letter-spacing: .14em !important;
+  }
+
+  /* Scroll cue overlaps hero text on narrow viewports */
+  [data-x="cue"] { display: none !important; }
+}
+
+/* ── 3. Mobile  ≤ 640 px ── */
+@media (max-width: 640px) {
+  /* Hero text area — reduce bottom padding so content breathes */
+  [data-x="herotext"] {
+    padding-bottom: clamp(28px, 5vh, 52px) !important;
+  }
+
+  /* Collection section header — stack label + heading + desc */
+  #collection > div:first-child {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+  }
+
+  /* Product cards — single column on narrow phones */
+  #collection > div:last-child {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Craft section — image below the text on mobile  */
+  #craft > div > div:first-child { order: 2; }
+  #craft > div > div:last-child  { order: 1; }
+
+  /* Story section — single column */
+  #story > div { grid-template-columns: 1fr !important; }
+
+  /* Footer bottom bar — center on very small screens */
+  footer > div:last-child {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 8px !important;
+  }
+}
+
+/* ── 4. Very small  ≤ 380 px ── */
+@media (max-width: 380px) {
+  /* Hide bag pill on tiny phones so brand stays legible */
+  [data-x="navcta"] { display: none !important; }
+
+  /* Pull section padding to the minimum so cards fill the screen */
+  #collection,
+  #craft,
+  #story {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  footer {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+}
+
+/* ============================================================
+   SYSTEM SCROLLBAR (BIGGER SCREENS ONLY)
+   Matches the Phorous luxury dark & gold UI (#9C7A3C / #0E0E0E)
+   Active on desktop viewports (≥ 901px) with fine pointer
+   ============================================================ */
+@media screen and (min-width: 901px) and (hover: hover) and (pointer: fine) {
+  /* Firefox standard */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #2e281f #0e0e0e;
+  }
+
+  /* WebKit (Chrome, Edge, Safari, Opera) */
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0e0e0e;
+    border-left: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #2b271f;
+    border-radius: 9999px;
+    border: 2px solid #0e0e0e;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #9c7a3c;
+    box-shadow: 0 0 10px rgba(156, 122, 60, 0.4);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: #bfa157;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: #0e0e0e;
+  }
+}
+
+
+
