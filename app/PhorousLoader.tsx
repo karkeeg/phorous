@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useCart } from './cart-context';
 
 export default function PhorousLoader() {
+  const { addItem, openDrawer } = useCart();
+
   useEffect(() => {
     const qs = <T extends HTMLElement>(sel: string) =>
       document.querySelector<T>(sel);
@@ -17,8 +20,7 @@ export default function PhorousLoader() {
     const himg     = qs<HTMLElement>('[data-x="heroimg"]');
     const htext    = qs<HTMLElement>('[data-x="herotext"]');
     const cue      = qs<HTMLElement>('[data-x="cue"]');
-    const ring     = qs<HTMLElement>('[data-x="ring"]');
-    const ringLabel = qs<HTMLElement>('[data-x="ringlabel"]');
+    // Custom cursor ring is disabled — markup is commented out in page.tsx.
     const brand    = qs<HTMLElement>('[data-x="brand"]');
     const navlinks = qsa<HTMLElement>('[data-x="navlink"]');
     const navcta   = qs<HTMLElement>('[data-x="navcta"]');
@@ -37,7 +39,6 @@ export default function PhorousLoader() {
 
 
     let cur = 0;
-    let mx = -999, my = -999, rx = -999, ry = -999;
     let raf = 0;
     let ro: ResizeObserver | null = null;
     const listeners: [EventTarget, string, EventListener][] = [];
@@ -151,16 +152,7 @@ export default function PhorousLoader() {
     setTimeout(measure, 300);
     setTimeout(measure, 800); // extra pass after fonts/images settle
 
-    // ---- cursor ring ----
-    let hoverLabel = '';
-    on(window, 'mousemove', ((e: MouseEvent) => {
-      mx = e.clientX; my = e.clientY;
-      if (rx < -500) { rx = e.clientX; ry = e.clientY; }
-    }) as EventListener);
-    qsa<HTMLElement>('[data-cursor]').forEach(el => {
-      on(el, 'mouseenter', () => { hoverLabel = el.dataset.cursor ?? ''; });
-      on(el, 'mouseleave', () => { hoverLabel = ''; });
-    });
+    // ---- cursor ring: disabled per request (ring markup commented out in page.tsx) ----
 
     // ---- magnetic buttons ----
     qsa<HTMLElement>('[data-mag]').forEach(el => {
@@ -207,6 +199,79 @@ export default function PhorousLoader() {
     if (sub) {
       on(sub, 'mouseenter', () => { sub.style.background = ACCENT; sub.style.color = '#1C1B19'; });
       on(sub, 'mouseleave', () => { sub.style.background = 'transparent'; sub.style.color = '#EDE8DE'; });
+    }
+
+    // ---- nav Bag opens the slide-in drawer instead of navigating ----
+    if (navcta) {
+      on(navcta, 'click', ((e: MouseEvent) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // let modified clicks open /bag normally
+        e.preventDefault();
+        openDrawer();
+      }) as EventListener);
+    }
+
+    // ---- add to bag ----
+    qsa<HTMLButtonElement>('[data-add-to-bag]').forEach(btn => {
+      const originalLabel = btn.textContent ?? '';
+
+      // Hover color: the button's own inline background/color/border always beat a
+      // stylesheet :hover rule for those same properties, so this has to be JS.
+      on(btn, 'mouseenter', () => {
+        if (btn.disabled) return;
+        btn.style.background = ACCENT;
+        btn.style.color = '#EDE8DE';
+        btn.style.borderColor = ACCENT;
+      });
+      on(btn, 'mouseleave', () => {
+        if (btn.disabled) return;
+        btn.style.background = 'transparent';
+        btn.style.color = '#1C1B19';
+        btn.style.borderColor = 'rgba(28,27,25,.32)';
+      });
+
+      on(btn, 'click', (e => {
+        e.preventDefault();
+        const { id, name, variant, price, image } = btn.dataset;
+        if (!id || !name || !variant || !price || !image) return;
+        addItem({ id, name, variant, price: parseFloat(price), image });
+
+        if (navcta) {
+          navcta.style.transition = 'transform .25s cubic-bezier(.34,1.56,.64,1)';
+          navcta.style.transform = 'scale(1.12)';
+          setTimeout(() => { navcta.style.transform = 'scale(1)'; }, 250);
+        }
+
+        btn.disabled = true;
+        btn.style.background = ACCENT;
+        btn.style.color = '#EDE8DE';
+        btn.style.borderColor = ACCENT;
+        btn.textContent = 'Bagged';
+        setTimeout(() => {
+          btn.textContent = originalLabel;
+          btn.disabled = false;
+          btn.style.background = 'transparent';
+          btn.style.color = '#1C1B19';
+          btn.style.borderColor = 'rgba(28,27,25,.32)';
+        }, 900);
+      }) as EventListener);
+    });
+
+    // ---- product row scroll arrows ----
+    const prodRow  = qs<HTMLElement>('[data-x="prodrow"]');
+    const prevBtn  = qs<HTMLButtonElement>('[data-x="prodscroll-prev"]');
+    const nextBtn  = qs<HTMLButtonElement>('[data-x="prodscroll-next"]');
+    if (prodRow && prevBtn && nextBtn) {
+      const scrollByCard = (dir: 1 | -1) => {
+        const card = prodRow.querySelector<HTMLElement>('article');
+        const amount = (card ? card.getBoundingClientRect().width : 260) + 24;
+        prodRow.scrollBy({ left: dir * amount, behavior: 'smooth' });
+      };
+      on(prevBtn, 'click', () => scrollByCard(-1));
+      on(nextBtn, 'click', () => scrollByCard(1));
+      [prevBtn, nextBtn].forEach(arrow => {
+        on(arrow, 'mouseenter', () => { arrow.style.background = ACCENT; arrow.style.color = '#EDE8DE'; arrow.style.borderColor = ACCENT; });
+        on(arrow, 'mouseleave', () => { arrow.style.background = 'transparent'; arrow.style.color = '#1C1B19'; arrow.style.borderColor = 'rgba(28,27,25,.24)'; });
+      });
     }
 
     // ---- smooth-scroll anchors ----
@@ -265,15 +330,7 @@ export default function PhorousLoader() {
         if (b.top < vh * 0.9 && b.bottom > -80) { o.done = true; settle(o.el, o.delay); }
       }
 
-      // cursor ring
-      if (ring && ringLabel) {
-        rx += (mx - rx) * 0.18;
-        ry += (my - ry) * 0.18;
-        const big = hoverLabel !== '';
-        ring.style.transform = `translate3d(${rx.toFixed(1)}px,${ry.toFixed(1)}px,0) scale(${big ? 1.5 : 1})`;
-        ring.style.opacity   = mx < -500 ? '0' : (big ? '1' : '.5');
-        if (ringLabel.textContent !== hoverLabel) ringLabel.textContent = hoverLabel;
-      }
+      // cursor ring — disabled (see comment above)
 
       raf = requestAnimationFrame(tick);
     };
@@ -285,7 +342,7 @@ export default function PhorousLoader() {
       listeners.forEach(([t, e, f]) => t.removeEventListener(e, f));
       if (ro) ro.disconnect();
     };
-  }, []);
+  }, [addItem, openDrawer]);
 
   return null;
 }

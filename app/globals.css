@@ -657,6 +657,20 @@ textarea.input { min-height: 90px; resize: vertical; }
   [data-x="ring"] { display: none !important; }
 }
 
+/* ── Add to Bag buttons on product cards ── */
+/* Hover color is driven from PhorousLoader.tsx (JS), not CSS: the buttons carry
+   inline background/color/border styles, which always beat a stylesheet :hover
+   rule for the same properties — so the transition below is the only CSS needed. */
+.ph-add-btn { transition: background .3s ease, color .3s ease, border-color .3s ease; }
+.ph-add-btn:disabled { opacity: .6; cursor: default; }
+
+/* ── Product row: single line, horizontal scroll — scrollbar hidden, use the arrow buttons or drag/swipe ── */
+#collection > div[data-x="prodrow"] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+#collection > div[data-x="prodrow"]::-webkit-scrollbar { display: none; }
+
 /* ── 2. Tablet / large-phone  ≤ 900 px ── */
 @media (max-width: 900px) {
   /* Collapse nav text links — keep brand + bag pill */
@@ -687,9 +701,10 @@ textarea.input { min-height: 90px; resize: vertical; }
     gap: 14px !important;
   }
 
-  /* Product cards — single column on narrow phones */
-  #collection > div:last-child {
-    grid-template-columns: 1fr !important;
+  /* Product row stays a single scrollable line on narrow phones too — just
+     shrink the card width a bit so more of the next card peeks into view. */
+  #collection > div[data-x="prodrow"] article {
+    width: clamp(190px, 68vw, 240px) !important;
   }
 
   /* Craft section — image below the text on mobile  */

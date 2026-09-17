@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { CartProvider } from "./cart-context";
+import CartBadge from "./CartBadge";
+import BagDrawer from "./BagDrawer";
 
 export const metadata: Metadata = {
   title: "Phorous — Heavyweight No. 01",
@@ -16,7 +19,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <CartProvider>
+          <CartBadge />
+          <BagDrawer />
+          {children}
+        </CartProvider>
+      </body>
     </html>
   );
 }
