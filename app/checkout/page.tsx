@@ -181,7 +181,7 @@ export default function CheckoutPage() {
           </Link>
         </main>
       ) : (
-      <main style={{ maxWidth: 920, margin: '0 auto', padding: 'clamp(40px,7vh,80px) clamp(20px,4vw,56px)', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,320px)', gap: 'clamp(32px,5vw,64px)' }}>
+      <main className="checkout-layout" style={{ maxWidth: 920, margin: '0 auto', padding: 'clamp(40px,7vh,80px) clamp(20px,4vw,56px)', display: 'grid', gap: 'clamp(32px,5vw,64px)' }}>
         <div>
           <div style={{ display: 'flex', gap: 24, marginBottom: 32, fontSize: 12, letterSpacing: '.12em', textTransform: 'uppercase' }}>
             <span style={{ color: step === 1 ? INK : '#8F8A7E', fontWeight: step === 1 ? 600 : 400 }}>1. Shipping</span>
@@ -214,7 +214,7 @@ export default function CheckoutPage() {
                 )}
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="city-postal" style={{ display: 'grid', gap: 16 }}>
                 <Field label="City" value={shipping.city} onChange={v => setShipping({ ...shipping, city: v })} autoComplete="address-level2" />
                 <Field label="Postal code" value={shipping.postalCode} onChange={v => setShipping({ ...shipping, postalCode: v })} autoComplete="postal-code" />
               </div>
@@ -242,7 +242,7 @@ export default function CheckoutPage() {
 
               <div>
                 <span style={labelStyle}>Payment method</span>
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div className="payment-methods" style={{ display: 'flex', gap: 10 }}>
                   {PAYMENT_METHODS.map(m => (
                     <button
                       key={m.id}
@@ -280,7 +280,7 @@ export default function CheckoutPage() {
                 </p>
               )}
 
-              <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+              <div className="payment-actions" style={{ display: 'flex', gap: 12, marginTop: 12 }}>
                 <button
                   type="button"
                   onClick={() => setStep(1)}
@@ -296,6 +296,7 @@ export default function CheckoutPage() {
                     background: processing ? '#8F8A7E' : ACCENT, color: CANVAS, fontSize: 12,
                     letterSpacing: '.18em', textTransform: 'uppercase',
                     cursor: processing ? 'default' : 'pointer',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {processing ? 'Processing…' : `Confirm order — ${formatNPR(subtotal)}`}
@@ -305,7 +306,7 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        <aside style={{ borderLeft: '1px solid rgba(28,27,25,.14)', paddingLeft: 'clamp(24px,4vw,40px)' }}>
+        <aside className="order-summary">
           <h2 style={{ fontFamily: 'Fraunces, serif', fontWeight: 400, fontSize: 18, marginBottom: 16 }}>Order summary</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {items.map(item => (
@@ -361,6 +362,49 @@ export default function CheckoutPage() {
         @keyframes phToastIn {
           from { opacity: 0; transform: translateY(-12px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        .checkout-layout {
+          grid-template-columns: minmax(0,1fr) minmax(0,320px);
+        }
+
+        .order-summary {
+          border-left: 1px solid rgba(28,27,25,.14);
+          padding-left: clamp(24px,4vw,40px);
+        }
+
+        .city-postal {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 720px) {
+          .checkout-layout {
+            grid-template-columns: 1fr;
+          }
+          .order-summary {
+            border-left: none;
+            border-top: 1px solid rgba(28,27,25,.14);
+            padding-left: 0;
+            padding-top: 32px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .payment-methods {
+            flex-direction: column;
+          }
+          .payment-actions {
+            flex-direction: column;
+          }
+          .payment-actions button {
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 380px) {
+          .city-postal {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </div>
